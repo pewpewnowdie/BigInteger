@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include "BigInteger.h"
 struct node
 {
     unsigned int data : 4;
