@@ -1,14 +1,11 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include "BigInteger.h"
-struct node
-{
+struct node {
     unsigned int data : 4;
     struct node* next;
 };
-struct BigInteger
-{
+struct BigInteger {
     struct node* head;
     long long int size;
     int sign : 2;
@@ -29,72 +26,58 @@ struct BigInteger divby2(struct BigInteger);
 struct BigInteger mod(struct BigInteger,struct BigInteger);
 
 
-void insert(struct BigInteger* big,int val)
+void insert(struct BigInteger* number,int val)
 {
-    struct node* temp=(struct node*)malloc(sizeof(struct node));
-    temp->data=val;
-    temp->next=NULL;
-    if(!(big->head))
-    {
-        big->head=temp;
-        big->size++;
+    struct node* tmp=(struct node*)malloc(sizeof(struct node));
+    tmp->data=val;
+    tmp->next=NULL;
+    if(!(number->head)) {
+        number->head=tmp;
+        number->size++;
         return ;
     }
-    struct node* itr=big->head;
-    while(itr->next!=NULL)
-    {
-        itr=itr->next;
-    }
-    itr->next=temp;
-    big->size++;
+    struct node* itr=number->head;
+    while(itr->next!=NULL) itr=itr->next;
+    itr->next=tmp;
+    number->size++;
     return ;
 }
 struct BigInteger initialize(char* s)
 {
-    struct BigInteger temp;
-    temp.head=NULL;
-    temp.sign=1;
-    temp.size=0;
+    struct BigInteger tmp;
+    tmp.head=NULL;
+    tmp.sign=1;
+    tmp.size=0;
     int len=strlen(s);
-    if(s[0]=='-')
-    {
-        temp.sign=-1;
-    }
-    for(int i=0;i<len;i++)
-    {
+    if(s[0]=='-') tmp.sign=-1;
+    for(int i=0;i<len;i++) {
         if(s[i]=='-')
-        {
             continue;
-        }
         int val=s[i]-48;
-        insert(&temp,val);
+        insert(&tmp,val);
     }
-    return temp;
+    return tmp;
 }
 
-void display(struct BigInteger ans)
-{
+void display(struct BigInteger ans) {
     struct node* itr=ans.head;
-    while(itr!=NULL)
-    {
+    while(itr!=NULL) {
         printf("%d",itr->data);
         itr=itr->next;
     }
     printf("\n");
 }
-void reverse(struct BigInteger* temp)
-{
+void reverse(struct BigInteger* tmp) {
     struct node* prev=NULL;
-    struct node* curr=temp->head;
+    struct node* curr=tmp->head;
     struct node* next=NULL;
-    while(curr!=NULL)
-    {
+    while(curr!=NULL) {
         next=curr->next;
         curr->next=prev;
         prev=curr;
         curr=next;
     }
-    temp->head=prev;
+    tmp->head=prev;
 }
 struct BigInteger add(struct BigInteger val1,struct BigInteger val2)
 {
@@ -102,30 +85,17 @@ struct BigInteger add(struct BigInteger val1,struct BigInteger val2)
     ans.head=NULL;
     ans.size=0;
     ans.sign=1;
-    if(val1.sign==-1 && val2.sign==-1)
-    {
-        ans.sign=-1;
-    }
-    else if(val1.sign==-1 || val2.sign==-1)
-    {
-        if(compare(val1,val2)==2 && val2.sign==-1)
-        {
+    if(val1.sign==-1 && val2.sign==-1) ans.sign=-1;
+    else if(val1.sign==-1 || val2.sign==-1) {
+        if(compare(val1,val2)==2 && val2.sign==-1) {
+            ans=suba(val1,val2);
+            ans.head->data=-1*ans.head->data;
+        } else if(compare(val1,val2)==1 && val1.sign==-1) {
             ans=suba(val1,val2);
             ans.head->data=-1*ans.head->data;
         }
-        else if(compare(val1,val2)==1 && val1.sign==-1)
-        {
-            ans=suba(val1,val2);
-            ans.head->data=-1*ans.head->data;
-        }
-        else if(compare(val1,val2)==1 && val2.sign==-1)
-        {
-            ans=suba(val1,val2);
-        }
-        else if(compare(val1,val2)==2 && val1.sign==-1)
-        {
-            ans=suba(val1,val2);
-        }
+        else if(compare(val1,val2)==1 && val2.sign==-1) ans=suba(val1,val2);
+        else if(compare(val1,val2)==2 && val1.sign==-1) ans=suba(val1,val2);
         return ans;
     }
     reverse(&val1);
@@ -134,93 +104,63 @@ struct BigInteger add(struct BigInteger val1,struct BigInteger val2)
     int sum=0;
     struct node* itr=val1.head;
     struct node* ptr=val2.head;
-    while(itr!=NULL || ptr!=NULL || carry>0)
-    {
+    while(itr!=NULL || ptr!=NULL || carry>0) {
         int dig1=(itr!=NULL)?itr->data:0;
         int dig2=(ptr!=NULL)?ptr->data:0;
         sum=dig1+dig2+carry;
         carry=sum/10;
         insert(&ans,sum%10);  
-        if(itr!=NULL)
-        {
-            itr=itr->next;
-        }
-        if(ptr!=NULL)
-        {
-            ptr=ptr->next;
-        }
+        if(itr!=NULL) itr=itr->next;
+        if(ptr!=NULL) ptr=ptr->next;
     }
     reverse(&val1);
     reverse(&val2);
     reverse(&ans);
     struct node* p=ans.head;
-    while(p->next!=NULL)
-    {
-        if(p->data!=0)
-        {
-            break;
-        }
-        if(p->data==0)
-        {
+    while(p->next!=NULL) {
+        if(p->data!=0) break;
+        if(p->data==0) {
             p=p->next;
             ans.head=p;
-        }
-        else
-        {
-            p=p->next;
-        }
-        
+        } else p=p->next;
     }
     ans.head->data=ans.sign*ans.head->data;
     return ans;
 }
-void swap(struct BigInteger* val1,struct BigInteger* val2)
-{
+void swap(struct BigInteger* val1,struct BigInteger* val2) {
     int flag=0;
     struct node* itr=val1->head;
     struct node* ptr=val2->head;
-    if(val1->size<val2->size)
-    {
-        struct BigInteger temp=*val1;
+    if(val1->size<val2->size) {
+        struct BigInteger tmp=*val1;
         *val1=*val2;
-        *val2=temp;
+        *val2=tmp;
     }
-    else if(val1->size==val2->size)
-    {
+    else if(val1->size==val2->size) {
         while(itr!=NULL && ptr!=NULL)
         {
-            if(itr->data<ptr->data)
-            {
+            if(itr->data<ptr->data) {
                 flag=1;
                 break;
             }
             itr=itr->next;
             ptr=ptr->next;
         }
-        if(flag)
-        {
-            struct BigInteger temp=*val1;
+        if(flag) {
+            struct BigInteger tmp=*val1;
             *val1=*val2;
-            *val2=temp;
+            *val2=tmp;
         }
     }
 }
-int compare(struct BigInteger val1,struct BigInteger val2)
-{
-    if(val1.size<val2.size)
-    {
-        return 2;
-    }
+int compare(struct BigInteger val1,struct BigInteger val2) {
+    if(val1.size<val2.size) return 2;
     else if(val1.size==val2.size)
     {
         struct node* itr=val1.head;
         struct node* ptr=val2.head;
-        while(itr!=NULL && ptr!=NULL)
-        {
-            if(itr->data>ptr->data)
-            {
-                return 1;
-            }
+        while(itr!=NULL && ptr!=NULL) {
+            if(itr->data>ptr->data) return 1;
             itr=itr->next;
             ptr=ptr->next;
         }
@@ -228,94 +168,70 @@ int compare(struct BigInteger val1,struct BigInteger val2)
     }
     return 1;
 }
-struct BigInteger sub(struct BigInteger val1,struct BigInteger val2)
-{
-    int temp=0;
+struct BigInteger sub(struct BigInteger val1,struct BigInteger val2) {
+    int tmp=0;
     struct BigInteger ans;
     ans.head=NULL;
     ans.sign=1;
     ans.size=0;
-    if(val1.sign==-1 && val2.sign==-1)
-    {
+    if(val1.sign==-1 && val2.sign==-1) {
         if(compare(val1,val2)==1)
-        {
             ans.sign=-1;
-        }
         else
-        {
             ans.sign=1;
-        }
     }
-    else if(val1.sign==-1 && val2.sign==1)
-    {
+    else if(val1.sign==-1 && val2.sign==1) {
         ans.sign=-1;
         ans=adds(val1,val2);
         ans.head->data=-1*ans.head->data;
         return ans;
     }
-    else if(val1.sign==1 && val2.sign==-1)
-    {
+    else if(val1.sign==1 && val2.sign==-1) {
         ans=adds(val1,val2);
         return ans;
     }
-    else
-    {
+    else {
         if(compare(val1,val2)==2)
-        {
             ans.sign=-1;
-        }
     }
     swap(&val1,&val2);
     reverse(&val1);
     reverse(&val2);
-    int borrow=0;
+    int carryb=0;
     int diff=0;
     struct node* itr=val1.head;
     struct node* ptr=val2.head;
-    while (itr!=NULL || ptr!=NULL)
-    {
+    while (itr!=NULL || ptr!=NULL) {
         int digit1=(itr!=NULL)?itr->data:0;
         int digit2=(ptr!=NULL)?ptr->data:0;
-        if(borrow==1)
-        {
+        if(carryb==1) {
             digit1=digit1-1;
-            borrow=0;
+            carryb=0;
         }
-        if(digit1<digit2)
-        {
+        if(digit1<digit2) {
             digit1=digit1+10;
-            borrow=1;
+            carryb=1;
         }
         diff=digit1-digit2;
         insert(&ans,diff);
         if(itr!=NULL)
-        {
             itr=itr->next;
-        }
         if(ptr!=NULL)
-        {
             ptr=ptr->next;
-        }
     }
     reverse(&val1);
     reverse(&val2);
     reverse(&ans);
     struct node* p=ans.head;
-    while(p->next!=NULL)
-    {
+    while(p->next!=NULL) {
         if(p->data!=0)
-        {
             break;
-        }
-        if(p->data==0)
-        {
+        if(p->data==0) {
             p=p->next;
             ans.head=p;
         }
         else
-        {
             p=p->next;
-        }
         
     }
     ans.head->data=ans.head->data*ans.sign;
@@ -323,7 +239,7 @@ struct BigInteger sub(struct BigInteger val1,struct BigInteger val2)
 }
 struct BigInteger suba(struct BigInteger val1,struct BigInteger val2)
 {
-    int temp=0;
+    int tmp=0;
     struct BigInteger ans;
     ans.head=NULL;
     ans.sign=1;
@@ -331,20 +247,20 @@ struct BigInteger suba(struct BigInteger val1,struct BigInteger val2)
     swap(&val1,&val2);
     reverse(&val1);
     reverse(&val2);
-    int borrow=0;
+    int carryb=0;
     int diff=0;
     struct node* itr=val1.head;
     struct node* ptr = val2.head;
     while (itr != NULL || ptr != NULL) {
         int digit1 = (itr != NULL) ? itr->data : 0;
         int digit2 = (ptr != NULL) ? ptr->data : 0;
-        if (borrow == 1) {
+        if (carryb == 1) {
             digit1 = digit1 - 1;
-            borrow = 0;
+            carryb = 0;
         }
         if (digit1 < digit2) {
             digit1 = digit1 + 10;
-            borrow = 1;
+            carryb = 1;
         }
         diff = digit1 - digit2;
         insert(&ans, diff);
@@ -402,30 +318,30 @@ struct BigInteger suba(struct BigInteger val1,struct BigInteger val2)
         struct node* ptr = val2.head;
         int pos = 0;
         while (ptr != NULL) {
-            struct BigInteger temp;
-            temp.head = NULL;
-            temp.size = 0;
-            temp.sign = 1;
+            struct BigInteger tmp;
+            tmp.head = NULL;
+            tmp.size = 0;
+            tmp.sign = 1;
             itr = val1.head;
             int carry = 0;
             while (itr != NULL || carry > 0) {
                 int val1 = (itr != NULL) ? itr->data : 0;
                 int prod = ((ptr->data) * val1) + carry;
                 carry = prod / 10;
-                insert(&temp, prod % 10);
+                insert(&tmp, prod % 10);
                 if (itr != NULL) {
                     itr = itr->next;
                 }
             }
-            reverse(&temp);
+            reverse(&tmp);
             for (int i = 0; i < pos; i++) {
-                insert(&temp, 0);
+                insert(&tmp, 0);
             }
             struct BigInteger partres;
             partres.head = NULL;
             partres.size = 0;
             partres.sign = 1;
-            partres = add(ans, temp);
+            partres = add(ans, tmp);
             pos++;
             ans.head = partres.head;
             ans.size = partres.size;
@@ -546,8 +462,8 @@ struct BigInteger div1(struct BigInteger val1, struct BigInteger val2) {
     while (comparediv(low, high) != 1) {
         mid = add(high, low);
         mid = divby2(mid);
-        struct BigInteger temp = mul(mid, val2);
-        if (comparediv(temp, val1) == 1) {
+        struct BigInteger tmp = mul(mid, val2);
+        if (comparediv(tmp, val1) == 1) {
             high = sub(mid, one);
       } else {
             quotient = mid;
